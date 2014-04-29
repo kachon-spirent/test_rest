@@ -36,6 +36,22 @@ class RestApi
         data: JSON.parse body
       }
 
+  handle_response_res: (error, response, body, result) ->
+    if error
+      console.log "got error #{error}"
+      result.status = false
+      result
+    else if response.statusCode >= 400
+      console.log "got error status code #{response.statusCode} #{body}"
+      result.status = false
+      result
+    else
+      console.log "got response #{body}"
+      body = '{}' if not body    
+      result.status = true
+      result.data = JSON.parse body
+      result
+
   create_session: ->
     api = @get_session_api()
     form = 
@@ -92,17 +108,23 @@ class RestApi
         console.log "Finished get_obj_api #{api}"
         callback res
 
-  get_obj_promise: (obj) ->
+  get_obj_promise: (obj, result) ->
     deferred = Q.defer()
-    request {
-      url: 'http://' + 'twitter.com'
-    }, (err, res, body) ->
-      if err 
-        deferred.reject err
-      else
-        deferred.resolve {
-          headers: res.headers
-        }
+    result.obj = obj
+    api = "#{@get_obj_api()}#{obj}/"
+    options = {
+      url: api
+      headers: @get_session_header()
+    }
+    request.get options,
+      (err, res, body) =>
+        console.log "get_obj_promise #{obj}"
+        if err 
+          deferred.reject err
+        else
+          res = @handle_response_res err, res, body, result
+          console.log "Finished get_obj_promise #{JSON.stringify result}"
+          deferred.resolve res
 
     return deferred.promise
 

@@ -1,0 +1,9 @@
+/bllapi/connect/:ipAddress
+/bllapi/disconnect/:ipAddress
+/bllapi/refresh/:ipAddress
+/bllapi/reserve/portAddresses
+/bllapi/release/portAddresses
+/bllapi/reboot
+/bllapi/checkCommandStatus
+/bllapi/activatePackage
+/bllapi/upgradeFirmware

@@ -6,36 +6,55 @@ urls = [
   'twitter.com'
   'facebook.com'
   ]
-queue = []
 
-fetchUrl = (url) ->
+queue = []
+context = []
+
+fetchUrl = (url, context) ->
+  #console.log "fetchUrl context #{JSON.stringify context}"
   deferred = Q.defer()
   request {
     url: 'http://' + url
   },
   (err, res, body) ->
+    console.log "fetchurl callback context #{JSON.stringify context}"
     if err 
+      context.push 'no'
       deferred.reject err
     else
+      console.log "fetchurl got response"
+      context.push 'yes'
       deferred.resolve {
         headers: res.headers
       }
 
   return deferred.promise
 
+context.push '0'
+console.log "before foreach context #{JSON.stringify context}"
 urls.forEach (url) ->
-  queue.push fetchUrl url
+  queue.push fetchUrl url, context
 
 console.log "start 1st #{queue}"
+
 Q.all queue
-  .then (ful) ->
-    console.log "1st fulfilled #{JSON.stringify ful, null, 2}"
+  .then (ful1) ->
+    #console.log "1st fulfilled #{JSON.stringify ful1, null, 2}"
     queue2 = []
-    urls = ['spirent.com']
+    context2 = []
+    context3 = []
+    context.push context2
+    context.push context3
+    urls = ['spirent.com', 'google.com']
     urls.forEach (url) ->
-      queue2.push fetchUrl url
+      queue2.push fetchUrl url, context2
+    urls.forEach (url) ->
+      queue2.push fetchUrl url, context3
     console.log "start 2nd #{queue2}"
     Q.all queue2
-      .then (ful) ->
-        console.log "2nd fulfilled #{JSON.stringify ful, null, 2}"
+      .then (ful2) ->
+        context.push '3'
+        console.log "2nd fulfilled #{JSON.stringify ful2, null, 2}"
+        console.log "done context #{JSON.stringify context}"
 
+#console.log "done context #{JSON.stringify context}"
