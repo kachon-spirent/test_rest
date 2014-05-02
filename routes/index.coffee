@@ -44,6 +44,15 @@ router.get "/system1_promise", (req, res) ->
           res.send JSON.stringify result, null, 2
    return
 
+router.get "/:obj", (req, res) ->
+  obj = req.params.obj
+  console.log "get #{obj}"
+  bll_api.get_obj obj,
+    (result) ->
+      res.setHeader('Content-Type', 'application/json');
+      res.send JSON.stringify result, null, 2
+  return
+
 # router.get "/physicalchassismanager1", (req, res) ->
 #   queue = []
 #   result = {}
@@ -63,31 +72,51 @@ router.get "/system1_promise", (req, res) ->
 #       res.send result
 #   return
 
-router.get "/:obj", (req, res) ->
-  obj = req.params.obj
-  console.log "receive #{obj}"
-  queue = []
-  result = {}
-  queue.push bll_api.get_obj_promise "#{obj}", result
-  Q.all queue
-    .then (ful) ->
-      return
-      # children_list = result.data.children?.split " "
-      # if children_list and children_list.length
-      #   result.children = []
-      #   queue = get_children_promise children_list, result.children
-      #   Q.all queue
-      #     .then (ful) ->
-      #       console.log "Result #{JSON.stringify result, null, 2}"
-    .finally ->
-      console.log "Final result #{JSON.stringify result, null, 2}"
-      res.send result
-  return
+# router.get "/:obj", (req, res) ->
+#   obj = req.params.obj
+#   console.log "receive #{obj}"
+#   queue = []
+#   result = {}
+#   queue.push bll_api.get_obj_promise "#{obj}", result
+#   Q.all queue
+#     .then (ful) ->
+#       return
+#       # children_list = result.data.children?.split " "
+#       # if children_list and children_list.length
+#       #   result.children = []
+#       #   queue = get_children_promise children_list, result.children
+#       #   Q.all queue
+#       #     .then (ful) ->
+#       #       console.log "Result #{JSON.stringify result, null, 2}"
+#     .finally ->
+#       console.log "Final result #{JSON.stringify result, null, 2}"
+#       res.send result
+#   return
 
 router.get "/connect/:ip", (req, res) ->
   ip = req.params.ip
-  console.log "connect #{ip}"
+  console.log "get route connect #{ip}"
   bll_api.connect ip, (result) ->
+      res.setHeader('Content-Type', 'application/json');
+      res.send JSON.stringify result, null, 2
+
+router.get "/disconnect/:ip", (req, res) ->
+  ip = req.params.ip
+  console.log "get route disconnect #{ip}"
+  bll_api.disconnect ip, (result) ->
+      res.setHeader('Content-Type', 'application/json');
+      res.send JSON.stringify result, null, 2
+
+router.get "/refresh/:ip", (req, res) ->
+  ip = req.params.ip
+  console.log "get route refresh #{ip}"
+  bll_api.connect ip, (result) ->
+      res.setHeader('Content-Type', 'application/json');
+      res.send JSON.stringify result, null, 2
+
+router.post "/reserve/portAddresses", (req, res) ->
+  console.log "get route reserve/portAddresses #{JSON.stringify req.body}"
+  bll_api.reserve req.body, (result) ->
       res.setHeader('Content-Type', 'application/json');
       res.send JSON.stringify result, null, 2
 

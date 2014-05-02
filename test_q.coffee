@@ -56,5 +56,13 @@ Q.all queue
         context.push '3'
         console.log "2nd fulfilled #{JSON.stringify ful2, null, 2}"
         console.log "done context #{JSON.stringify context}"
+  .then (ful) ->
+    # queue = []
+    # Q.all queue
+    console.log "finally 1 #{JSON.stringify ful}"
+    return 'hello!!!'
+    
+  .then (ful) ->
+    console.log "finally #{JSON.stringify ful}"
 
 #console.log "done context #{JSON.stringify context}"
