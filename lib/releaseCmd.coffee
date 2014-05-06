@@ -18,12 +18,11 @@ utils = require './utils'
 
 class ReleaseCmd
   constructor: (@bllapi,
-                @data,
-                @callback)->
-    @_result = {}
+                @data)->
     @_port_list = []
     
-  run: =>
+  run: (callback) =>
+    @callback = callback
     console.log "run ReleaseCmd data: #{JSON.stringify @data}"
     async.waterfall [
       @_init
@@ -102,6 +101,6 @@ class ReleaseCmd
     if err
       @callback err
     else
-      @callback @_result
+      @callback {status: "ok", data: ""}
 
 module.exports = ReleaseCmd

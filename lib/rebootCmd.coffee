@@ -1,14 +1,15 @@
 request = require 'request'
 async = require 'async'
 Q = require 'q'
+utils = require './utils'
 
 class RebootCmd
   constructor: (@bllapi,
-                @ip_list,
-                @callback)->
+                @ip_list)->
     @_result = {}
 
-  run: =>
+  run: (callback) =>
+    @callback = callback
     console.log "run RebootCmd: #{@ip_list}"
     async.waterfall [
       @_connect
@@ -18,31 +19,15 @@ class RebootCmd
     @_end_task
 
   _connect: (next_task) =>
-    queue = for ip in @ip_list
-      @bllapi.get_connect_promise ip, {}
-    Q.all queue
-      .then (ful) =>
-        for result in ful
-          if result.status == 'failed'
-            next_task result
-            return
-
-        next_task null
-      .fail (error) =>
-        next_task error
+    utils.connect @bllapi, @ip_list, next_task
 
   _get_physical_chassis_hnds: (next_task) =>
-    @bllapi.get 'system1.physicalchassismanager', "Children-PhysicalChassis", (res) =>
-      if res.status == 'failed'
-        next_task res
-      else
-        hnds = res.data.split " "
-        next_task null, hnds
+    utils.get_physical_chassis_hnds @bllapi, next_task
 
   _reboot_physical_chassis_hnd: (hnds, next_task) =>
     if hnds.length
       queue = [] 
-      queue = @bllapi.get_children_promise hnds, []
+      queue = @bllapi.get_objs_promise hnds, []
       Q.all queue
         .then (ful) =>
           for chassis in ful

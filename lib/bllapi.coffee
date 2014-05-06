@@ -6,6 +6,8 @@ GetChassisInfoCmd = require './getChassisInfoCmd'
 ReserveCmd = require './reserveCmd'
 ReleaseCmd = require './releaseCmd'
 RebootCmd = require './rebootCmd'
+ActivatePackageCmd = require './activatePackageCmd'
+InstallFirmwareCmd = require './installFirmwareCmd'
 
 class BllApi
   constructor: (@host,
@@ -196,14 +198,6 @@ class BllApi
 
     return deferred.promise
 
-  get_children_promise: (children, children_result) ->
-    queue = []
-    children.forEach (ele) =>
-      child_result = {}
-      children_result.push child_result
-      queue.push @_get_promise ele, child_result
-    queue
-
   get_connect_promise: (ip, result) ->
     deferred = Q.defer()
     api = "#{@_get_connection_url()}/"
@@ -241,12 +235,12 @@ class BllApi
 
     return deferred.promise
 
-  get_children_promise: (children, children_result) =>
+  get_objs_promise: (objs, objs_result, prop...) =>
     queue = []
-    children.forEach (ele) =>
-      child_result = {}
-      children_result.push child_result
-      queue.push @get_promise ele, child_result
+    objs.forEach (obj) =>
+      obj_result = {}
+      objs_result.push obj_result
+      queue.push @get_promise obj, obj_result, prop...
     queue
 
   create_session: (callback) ->
@@ -267,7 +261,6 @@ class BllApi
           @sessionid = result.data.session_id
           console.log "Created session: #{result.data} #{@sessionid}"
           callback result
-
 
   delete_session: (callback) =>
     api = "#{@_get_session_url()}#{@sessionid}/"
@@ -350,8 +343,8 @@ class BllApi
 
   connect: (ip, callback) ->
     console.log "connect #{ip}"
-    getChassisInfoCmd = new GetChassisInfoCmd @, ip, callback
-    getChassisInfoCmd.run()
+    getChassisInfoCmd = new GetChassisInfoCmd @, ip
+    getChassisInfoCmd.run callback
 
   disconnect: (ip, callback) ->
     console.log "disconnect #{ip}"
@@ -369,23 +362,23 @@ class BllApi
 
   refresh: (ip, callback) ->
     console.log "refresh #{ip}"
-    getChassisInfoCmd = new GetChassisInfoCmd @, ip, callback
-    getChassisInfoCmd.run()
+    getChassisInfoCmd = new GetChassisInfoCmd @, ip
+    getChassisInfoCmd.run callback
 
   reserve: (data, callback) ->
     console.log "reserve"
-    reserveCmd = new ReserveCmd @, data, callback
-    reserveCmd.run()
+    reserveCmd = new ReserveCmd @, data
+    reserveCmd.run callback
 
   release: (data, callback) ->
     console.log "release"
-    reserveCmd = new ReleaseCmd @, data, callback
-    reserveCmd.run()
+    reserveCmd = new ReleaseCmd @, data
+    reserveCmd.run callback
 
   reboot: (ip, callback) ->
     console.log "reboot"
-    reserveCmd = new RebootCmd @, ip, callback
-    reserveCmd.run()
+    reserveCmd = new RebootCmd @, ip
+    reserveCmd.run callback
 
   check_command_status: (sequencer, cmd, callback) ->
     console.log "check_command_status"
@@ -403,4 +396,33 @@ class BllApi
       else
         callback {status: "ok", data: result.data}
 
+  activate_package: (port_group_list, test_pacakge, callback) =>
+    console.log "activate package"
+    pg_data = 
+      portGroupAddresses: port_group_list
+    releaseCmd = new ReleaseCmd @, pg_data
+    releaseCmd.run (result) =>
+      console.log "Finished ReleaseCmd"
+      if result.status == 'ok'    
+        activatePackageCmd = new ActivatePackageCmd @, port_group_list, test_pacakge
+        activatePackageCmd.run (result) =>
+          console.log "Finished ActivatePackageCmd"
+          if result.status == 'ok'
+            reserveCmd = new ReserveCmd @, pg_data
+            reserveCmd.run (result) =>
+              console.log "Finished ReleaseCmd"
+              if result.status == 'ok'
+                callback {status: "ok", data: ""}
+              else
+                callback result
+          else
+            callback result
+      else      
+        callback result
+
+  install_firmware: (ip_list, version, callback) =>
+    installCmd = new InstallFirmwareCmd @, ip_list, version
+    installCmd.run (result) =>
+      callback result
+      
 module.exports = BllApi

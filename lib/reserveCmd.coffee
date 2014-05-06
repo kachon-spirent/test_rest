@@ -18,12 +18,11 @@ utils = require './utils'
 
 class ReserveCmd
   constructor: (@bllapi,
-                @data,
-                @callback)->
-    @_result = {}
+                @data)->
     @_port_list = []
     
-  run: =>
+  run: (callback) =>
+    @callback = callback
     console.log "run ReserveCmd data: #{JSON.stringify @data}"
     async.waterfall [
       @_init
@@ -105,12 +104,12 @@ class ReserveCmd
         else
           next_task null, result
     else
-      next_task null
+      next_task null, {status: "ok", data: ""}
 
   _end_task: (err, result) =>
     if err
       @callback err
     else
-      @callback @_result
+      @callback result
 
 module.exports = ReserveCmd

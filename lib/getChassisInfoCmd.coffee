@@ -4,12 +4,12 @@ Q = require 'q'
 
 class GetChassisInfoCmd
   constructor: (@bllapi,
-                @ip,
-                @callback)->
+                @ip)->
     @_result = {}
     
 
-  run: =>
+  run: (callback) =>
+    @callback = callback
     console.log "run GetChassisInfoCmd ip: #{@ip}"
     async.waterfall [
       @_connect
@@ -37,7 +37,7 @@ class GetChassisInfoCmd
 
   _get_physical_chassis_hnd: (hnds, next_task) =>
     queue = [] 
-    queue = @bllapi.get_children_promise hnds, []
+    queue = @bllapi.get_objs_promise hnds, []
     Q.all queue
       .then (ful) =>
         for chassis in ful
@@ -64,7 +64,7 @@ class GetChassisInfoCmd
       if tm_list.length > 0
         chassis_result.children = []
         queue = []
-        queue = @bllapi.get_children_promise tm_list, chassis_result.children
+        queue = @bllapi.get_objs_promise tm_list, chassis_result.children
         Q.all queue
           .then (ful) =>
             for tm in ful
@@ -85,7 +85,7 @@ class GetChassisInfoCmd
         queue = []
         for pg in portgroup_list
           pg.tm_result.children = []
-          queue = queue.concat @bllapi.get_children_promise pg.portgroup, pg.tm_result.children
+          queue = queue.concat @bllapi.get_objs_promise pg.portgroup, pg.tm_result.children
         Q.all queue
           .then (ful) =>          
             next_task null, ful
