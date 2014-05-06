@@ -3,6 +3,7 @@
 Q = require 'q'
 
 bllapi = require "./lib/bllapi"
+GetChassisInfoCmd = require "./lib/getChassisInfoCmd"
 bll_api = new bllapi '10.8.227.16'
 
 run_q = (queue) ->
@@ -47,32 +48,32 @@ test_api_promise = ->
   #bll_api.create_session()
 
   queue = [] 
-  queue.push bll_api._get_promise 'project1', {}
+  queue.push bll_api.get_promise 'project1', {}
   Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
       queue = [] 
-      queue.push bll_api._get_promise 'project1', {}, "Name", "Active"
+      queue.push bll_api.get_promise 'project1', {}, "Name", "Active"
       Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
       queue = [] 
-      queue.push bll_api._create_promise 'port', {}, {"under": "project1"}, {"Name": "My Port"}
+      queue.push bll_api.create_promise 'port', {}, {"under": "project1"}, {"Name": "My Port"}
       Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
       queue = [] 
-      queue.push bll_api._config_promise 'port1', {}, {"Name": "My Port2"}
+      queue.push bll_api.config_promise 'port1', {}, {"Name": "My Port2"}
       Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
       queue = [] 
-      queue.push bll_api._delete_promise 'port1', {}
+      queue.push bll_api.delete_promise 'port1', {}
       Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
       queue = [] 
-      queue.push bll_api._perform_promise 'ApplyToIL', {}
+      queue.push bll_api.perform_promise 'ApplyToIL', {}
       Q.all queue
     .then (ful) ->
       console.log "#{JSON.stringify ful}"
@@ -80,59 +81,19 @@ test_api_promise = ->
     .fail (error) ->
       console.log "Error #{error}"
 
+test_bllapi = ->
+  ip = '10.8.234.99'
+  data = {"portGroupAddresses": ["#{ip}/1/1"]}
+  # bll_api.connect ip, (result) ->
+  #   console.log "connect #{JSON.stringify result, null, 2}"
+  #   bll_api.reserve data, (result) ->
+  #     console.log "reserve done #{JSON.stringify result, null, 2}"
+  #     bll_api.release data, (result) ->
+  #       console.log "release #{JSON.stringify result, null, 2}"
+  # bll_api.reboot [ip], (result) ->
+  #   console.log "reboot done #{JSON.stringify result, null, 2}"
+  bll_api.check_command_status "system1.sequencer", "cmd1", (result) ->
+    console.log "check_command_status done #{JSON.stringify result, null, 2}"
 
-# bll_api.delete_session (result) ->
-#   console.log "after delete session #{JSON.stringify result}" 
+test_bllapi()
 
-# bll_api.create_session (result) ->
-#   console.log "after create session #{JSON.stringify result}" 
-
-#test_api_promise()
-#test_api()
-#restart_session()
-
-# bll_api.create_session()
-
-# bll_api.get 'project1', (result) ->
-#  console.log "project 1 #{JSON.stringify result}"
-
-# bll_api.config 'project1', '{"Name": "DDDD"}', (result) ->
-#   console.log "After Config project 1 #{JSON.stringify result}"
-#   bll_api.get 'project1', (result) ->
-#     console.log "After Get project 1 #{JSON.stringify result}"
-
-# bll_api.create 'port', (result) ->
-#  console.log "create port #{JSON.stringify result}"
-
-# bll_api.delete 'port1', (result) ->
-#   console.log "delete port #{JSON.stringify result}"
-
-# queue = []
-# queue.push bll_api._get_promise 'project1', {}
-# console.log "#{queue}"
-
-# queue = [] 
-# queue.push bll_api._get_promise 'project1', {}, "Children-port"
-# run_q queue
-
-# queue = [] 
-# queue.push bll_api._config_promise 'project1', {}, {Name: "DDDD"}
-# run_q queue
-
-# queue = [] 
-# queue.push bll_api._create_promise 'Port', {}, {under: 'project1'}
-# run_q queue
-
-# queue = [] 
-# queue.push bll_api._delete_promise 'port2', {}
-# run_q queue
-
-# queue = [] 
-#restart_session()
-data = {"portGroupAddresses": ["10.8.232.85/1/1"]}
-bll_api.reserve data, (result) ->
-  console.log "reserve #{JSON.stringify result, null, 2}"
-
-  bll_api.get 'port1', (result) ->
-    console.log "port 1 #{JSON.stringify result}"
-#run_q queue
