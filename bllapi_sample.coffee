@@ -100,10 +100,10 @@ test_bllapi = ->
   #   console.log "reboot done #{JSON.stringify result, null, 2}"
   # bll_api.check_command_status "system1.sequencer", "cmd1", (result) ->
   #   console.log "check_command_status done #{JSON.stringify result, null, 2}"
-  # bll_api.activate_package [pg1], "stc", (result) ->
-  #   console.log "activate package #{JSON.stringify result, null, 2}"
-  bll_api.install_firmware [ip1], "2.0.0", (result) ->
-    console.log "install_firmware #{JSON.stringify result, null, 2}"
+  bll_api.activate_package [pg1], "stc", (result) ->
+    console.log "activate package #{JSON.stringify result, null, 2}"
+  # bll_api.install_firmware [ip1], "2.0.0", (result) ->
+  #   console.log "install_firmware #{JSON.stringify result, null, 2}"
 
 test_bllapi()
 

@@ -41,13 +41,13 @@ class ActivatePackageCmd
       if portgroup_ddn_list.length
         queue = [] 
         queue = @bllapi.get_objs_promise portgroup_ddn_list, [], "Handle"
-        Q.all queue
-          .then (ful) =>
+        utils.run_queue queue,
+          (ful) =>
             port_group_hnds = []
             for result in ful
               port_group_hnds.push result.data
             next_task null, port_group_hnds
-          .fail (err) =>
+          (err) =>
             next_task err
     else
       next_task null, []

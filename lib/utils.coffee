@@ -4,6 +4,11 @@ Q = require 'q'
 class Utils
   @PORTS_PER_PORT_GROUP = 2
 
+  @run_queue: (queue, then_callback, fail_callback) =>
+    Q.all queue
+      .then then_callback
+      .fail fail_callback
+
   @convert_pglist_to_plist: (pglist) ->
     #console.log "convert_pglist_to_plist #{pglist}"
     plist = for pg in pglist
@@ -40,8 +45,9 @@ class Utils
       queue = [] 
       queue = bllapi.get_objs_promise hnds, []
       ip_hnd_list = []
-      Q.all queue
-        .then (ful) =>
+
+      @run_queue queue,
+        (ful) =>
           for chassis in ful
             if chassis.status == 'failed'
               next_task {status: "failed", data: "#{chassis.data}"}
@@ -49,6 +55,8 @@ class Utils
               ip_hnd_list.push {ip: chassis.data.Hostname, hnd: chassis.obj}
 
           next_task null, ip_hnd_list
+        (err) =>
+
     else
       next_task null, []
 
