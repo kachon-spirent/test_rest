@@ -28,8 +28,8 @@ class RebootCmd
     if hnds.length
       queue = [] 
       queue = @bllapi.get_objs_promise hnds, []
-      Q.all queue
-        .then (ful) =>
+      utils.run_queue queue,
+        (ful) =>
           for chassis in ful
             if chassis.status == 'failed'
               next_task {status: "failed", data: "#{chassis.data}"}
@@ -42,9 +42,14 @@ class RebootCmd
               EquipmentList: found_chassis.obj
             @bllapi.perform "RebootEquipment", reboot_options, (result) =>
               if result.status == 'failed'
+                fdsf
                 next_task result
               else
                 next_task null, []
+          else
+            next_task null, []
+        (err) =>
+          console.log "err #{err}"
     else
       next_task null, []
 
